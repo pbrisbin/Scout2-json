@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+require "json"
+
+json = JSON.parse($stdin.read)
+json.fetch("services").each do |service, service_data|
+  violations = service_data.fetch("violations")
+
+  next if violations.all? { |_, v| v.fetch("flagged_items").zero? }
+
+  puts "## #{service}"
+  puts
+
+  violations.each do |_, violation_data|
+    unless violation_data.fetch("flagged_items").zero?
+      puts "### #{violation_data.fetch("description")}"
+      puts
+
+      puts "Level: **#{violation_data.fetch("level")}**"
+      puts
+
+      violation_data.fetch("items").each do |item|
+        puts "- #{item}"
+      end
+
+      puts
+    end
+  end
+end
